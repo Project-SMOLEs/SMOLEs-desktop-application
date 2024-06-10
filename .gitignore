@@ -52,3 +52,6 @@ compile_commands.json
 *creator.user*
 
 *_qmlcache.qrc
+
+# SMOLEs: Ignore generated application file
+smoles-desktop-application
