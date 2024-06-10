@@ -1,0 +1,10 @@
+{
+  "makefile.makefilePath": "",
+  "makefile.launchConfigurations": [
+    {
+      "cwd": "/home/max/sil_workspace/SMOLEs-desktop-application",
+      "binaryPath": "/home/max/sil_workspace/SMOLEs-desktop-application/smoles-desktop-application",
+      "binaryArgs": []
+    }
+  ]
+}
