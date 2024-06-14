@@ -39,3 +39,13 @@ void SmolesManager::set_data_storage_path(const std::string &_path)
 {
   std::cout << "Data stored at " << _path << "\n";
 }
+
+void SmolesManager::start_recording()
+{
+  std::cout << "Start recording.\n";
+}
+
+void SmolesManager::stop_recording()
+{
+  std::cout << "Stop recording.\n";
+}

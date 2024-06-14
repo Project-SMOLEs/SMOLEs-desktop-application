@@ -14,4 +14,6 @@ public:
   void stop_measuring();
 
   void set_data_storage_path(const std::string &_path);
+  void start_recording();
+  void stop_recording();
 };
