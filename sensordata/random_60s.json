@@ -1,6 +1,6 @@
 {
 "SensorDataPackage":[
-{"timeStamp":21790,"leftFoot":true,"label":0,"sensorData":[0,0,0,0,685,600,0,815,585,528,505,541,674,0,413,349]},
+{"timeStamp":21790,"leftFoot":true,"label":0,"sensorData":[0,0,0,0,685,600,4000,815,585,528,505,541,674,0,413,349]},
 {"timeStamp":22794,"leftFoot":true,"label":0,"sensorData":[0,0,0,0,684,191,0,0,585,528,507,539,675,0,411,349]},
 {"timeStamp":23798,"leftFoot":true,"label":0,"sensorData":[0,0,0,0,683,235,546,819,587,528,503,540,672,0,412,348]},
 {"timeStamp":24802,"leftFoot":true,"label":0,"sensorData":[0,0,0,1,685,223,551,0,590,528,508,541,673,0,411,347]},

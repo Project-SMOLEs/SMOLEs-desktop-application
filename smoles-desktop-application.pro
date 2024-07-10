@@ -11,12 +11,14 @@ CONFIG += c++17
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
+    RoundedRectItem.cpp \
     SmolesManager.cpp \
     Thread.cpp \
     main.cpp \
     mainwindow.cpp
 
 HEADERS += \
+    RoundedRectItem.h \
     SmolesManager.h \
     Thread.h \
     mainwindow.h

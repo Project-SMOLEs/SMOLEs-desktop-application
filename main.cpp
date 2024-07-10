@@ -12,13 +12,14 @@
 #include <QDebug>
 
 
+
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
     MainWindow w;
 
     // 加载并应用.qss文件
-    QString qssPath = "D:\\GUI\\demo\\SMOLEs-desktop-application\\style1.qss";
+    QString qssPath = "D:\\GUI\\demo\\SMOLEs-desktop-application\\style.qss";
     QFile file(qssPath);
 
     // 打印文件路径进行调试

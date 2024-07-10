@@ -32,9 +32,6 @@
 
 using namespace std;
 
-
-
-
 MainWindow::MainWindow(QWidget *parent): QMainWindow(parent), ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
@@ -52,7 +49,6 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent), ui(new Ui::MainWin
     ui->comboBox->setCurrentText(Combobox_defaultValue);
     connect(ui->comboBox,SIGNAL(currentIndexChanged(int)),this,SLOT(Set_Jsonfile_name()));
     connect(ui->comboBox,SIGNAL(currentIndexChanged(int)),this,SLOT(Reset_Confirmwindow()));
-//    connect(ui->comboBox,SIGNAL(currentIndexChanged(int)),this,SLOT(Visualization_Reset()));
 
     ui->pushButton_VISUALIZATION->setIcon(style()->standardIcon(QStyle::SP_MediaPlay));//set icon of buttons
     ui->pushButton_PAUSE->setIcon(style()->standardIcon(QStyle::SP_MediaPause));
@@ -64,25 +60,25 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent), ui(new Ui::MainWin
     scene_Visualization->setSceneRect(0,0,600,600);
     ui->graphicsView->setAlignment(Qt::AlignLeft | Qt::AlignTop);
     ui->graphicsView->setScene(scene_Visualization);//add the scene into graphview
-    QPixmap pixmap("D:\\GUI\\demo\\SMOLEs-desktop-application\\image\\image.png");
-    QGraphicsPixmapItem *item = new QGraphicsPixmapItem(pixmap);
+    QPixmap pixmap_Insole("D:\\GUI\\demo\\SMOLEs-desktop-application\\image\\image.png");
+    QGraphicsPixmapItem *item_Insole = new QGraphicsPixmapItem(pixmap_Insole);
 
     // set the picture position
-    item->setPos(50, 50);
+    item_Insole->setPos(50, 50);
     QRectF sceneRect = scene_Visualization->sceneRect();
     QSizeF sceneSize = sceneRect.size();
-    QSize imageSize = pixmap.size();
+    QSize imageSize = pixmap_Insole.size();
 
     qreal scaleX = sceneSize.width() / imageSize.width();
     qreal scaleY = sceneSize.height() / imageSize.height();
     qreal scale = qMin(scaleX, scaleY);
-    item->setScale(scale);
-    scene_Visualization->addItem(item);
+    item_Insole->setScale(scale);
+    scene_Visualization->addItem(item_Insole);
 
 
-    scene_Pressure_value = new QGraphicsScene(this);
+    scene_Pressure_value = new QGraphicsScene(this);//set QGraphicsScene of Pressure value
     ui->graphicsView_2->setAlignment(Qt::AlignLeft | Qt::AlignBottom);
-    scene_Pressure_value->setSceneRect(0,0,600,600);
+    scene_Pressure_value->setSceneRect(0,0,710,710);
     ui->graphicsView_2->setScene(scene_Pressure_value);
     // set Pen of Pressure value graph
     pen_Pressure_value.setColor(Qt::white);
@@ -92,70 +88,91 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent), ui(new Ui::MainWin
     ui->graphicsView_2->setRenderHint(QPainter::Antialiasing);
 
     // draw X and Yaxis
-    scene_Pressure_value->addLine(QLineF(0, 600, 600, 600), pen_Pressure_value); // X轴
-    scene_Pressure_value->addLine(QLineF(0, 600, 0, 0), pen_Pressure_value); // Y轴
+    scene_Pressure_value->addLine(QLineF(50, 680, 700, 680), pen_Pressure_value); // X axis
+    scene_Pressure_value->addLine(QLineF(50, 680, 50, 30), pen_Pressure_value); // Y axis
 //    ui->graphicsView_2->fitInView(scene_Pressure_value->sceneRect(), Qt::KeepAspectRatio);
 
-//    // 定义折线图的数据点
-//    QVector<QPointF> points = {
-//        QPointF(0, 0),
-//        QPointF(50, 30),
-//        QPointF(100, 20),
-//        QPointF(150, 80),
-//        QPointF(200, 50)
-//    };
+//    // Add arrows to the axes
+//    QPolygonF arrowHeadX;
+//    arrowHeadX << QPointF(700, 680) << QPointF(690, 6970) << QPointF(690, 690);
+//    QPolygonF arrowHeadY;
+//    arrowHeadY << QPointF(50, 50) << QPointF(60, 60) << QPointF(40, 60);
+//    scene_Pressure_value->addPolygon(arrowHeadX, pen_Pressure_value, brush_);
+//    scene_Pressure_value->addPolygon(arrowHeadY, pen_Pressure_value, brush_);
 
-//    // 绘制X轴和Y轴上的标签
-//    for (int i = 0; i <= 200; i += 50) {
-//        QGraphicsTextItem *textItem = scene_Pressure_value->addText(QString::number(i));
-//        textItem->setPos(i, 105); // X轴标签
-//    }
+    // Define the scale factor
+    const qreal scaleFactor = 5000.0 / 650.0;
 
-//    for (int i = 0; i <= 100; i += 20) {
-//        QGraphicsTextItem *textItem = scene_Pressure_value->addText(QString::number(i));
-//        textItem->setPos(-20, 100 - i); // Y轴标签
-//    }
+    // Add tick marks to the X and Y axes
+    for(int i = 0; i <= 650; i += 50)
+    {
+        scene_Pressure_value->addLine(QLineF(50 + i, 675, 50 + i, 685), pen_Pressure_value); // X axis ticks
+        scene_Pressure_value->addLine(QLineF(45, 680 - i, 55, 680 - i), pen_Pressure_value); // Y axis ticks
 
-//    // 将数据点连成折线并添加到场景中
-//    for (int i = 0; i < points.size() - 1; ++i) {
-//        scene_Pressure_value->addLine(QLineF(points[i].x(), 100 - points[i].y(), points[i + 1].x(), 100 - points[i + 1].y()), pen_Pressure_value);
-//    }
+        // X axis labels
+        QGraphicsTextItem *textX = scene_Pressure_value->addText(QString::number(static_cast<int>(i * scaleFactor)));
+        textX->setDefaultTextColor(Qt::white);
+        textX->setPos(50 + i - 10, 690); // Adjust position to center the text
+
+        // Y axis labels
+        QGraphicsTextItem *textY = scene_Pressure_value->addText(QString::number(static_cast<int>(i * scaleFactor)));
+        textY->setDefaultTextColor(Qt::white);
+        textY->setPos(5, 680 - i - 10); // Adjust position to center the text
+    }
 
 
 
-    RectItemL1 = new QGraphicsRectItem(0, 0, 30, 30);RectItemL1->setBrush(QColor(0,0,255));
-    RectItemL2 = new QGraphicsRectItem(0, 0, 30, 30);RectItemL2->setBrush(QColor(0,0,255));
-    RectItemL3 = new QGraphicsRectItem(0, 0, 30, 30);RectItemL3->setBrush(QColor(0,0,255));
-    RectItemL4 = new QGraphicsRectItem(0, 0, 30, 30);RectItemL4->setBrush(QColor(0,0,255));
-    RectItemL5 = new QGraphicsRectItem(0, 0, 30, 30);RectItemL5->setBrush(QColor(0,0,255));
-    RectItemL6 = new QGraphicsRectItem(0, 0, 30, 30);RectItemL6->setBrush(QColor(0,0,255));
-    RectItemL7 = new QGraphicsRectItem(0, 0, 30, 30);RectItemL7->setBrush(QColor(0,0,255));
-    RectItemL8 = new QGraphicsRectItem(0, 0, 30, 30);RectItemL8->setBrush(QColor(0,0,255));
-    RectItemL9 = new QGraphicsRectItem(0, 0, 30, 30);RectItemL9->setBrush(QColor(0,0,255));
-    RectItemL10 = new QGraphicsRectItem(0, 0, 30, 30);RectItemL10->setBrush(QColor(0,0,255));
-    RectItemL11 = new QGraphicsRectItem(0, 0, 30, 30);RectItemL11->setBrush(QColor(0,0,255));
-    RectItemL12 = new QGraphicsRectItem(0, 0, 30, 30);RectItemL12->setBrush(QColor(0,0,255));
-    RectItemL13 = new QGraphicsRectItem(0, 0, 30, 30);RectItemL13->setBrush(QColor(0,0,255));
-    RectItemL14 = new QGraphicsRectItem(0, 0, 30, 30);RectItemL14->setBrush(QColor(0,0,255));
-    RectItemL15 = new QGraphicsRectItem(0, 0, 30, 30);RectItemL15->setBrush(QColor(0,0,255));
-    RectItemL16 = new QGraphicsRectItem(0, 0, 30, 30);RectItemL16->setBrush(QColor(0,0,255));
+    scene_Logo = new QGraphicsScene(this);//set QGraphicsScene of Logo
+    scene_Logo->setSceneRect(0,0,881,161);
+    QPixmap pixmap_Logo("D:\\GUI\\demo\\SMOLEs-desktop-application\\image\\cover.png");
+    QGraphicsPixmapItem *item_Logo = new QGraphicsPixmapItem(pixmap_Logo);
+    scene_Logo->addItem(item_Logo);
 
-    RectItemR1 = new QGraphicsRectItem(0, 0, 30, 30);RectItemR1->setBrush(QColor(0,0,255));
-    RectItemR2 = new QGraphicsRectItem(0, 0, 30, 30);RectItemR2->setBrush(QColor(0,0,255));
-    RectItemR3 = new QGraphicsRectItem(0, 0, 30, 30);RectItemR3->setBrush(QColor(0,0,255));
-    RectItemR4 = new QGraphicsRectItem(0, 0, 30, 30);RectItemR4->setBrush(QColor(0,0,255));
-    RectItemR5 = new QGraphicsRectItem(0, 0, 30, 30);RectItemR5->setBrush(QColor(0,0,255));
-    RectItemR6 = new QGraphicsRectItem(0, 0, 30, 30);RectItemR6->setBrush(QColor(0,0,255));
-    RectItemR7 = new QGraphicsRectItem(0, 0, 30, 30);RectItemR7->setBrush(QColor(0,0,255));
-    RectItemR8 = new QGraphicsRectItem(0, 0, 30, 30);RectItemR8->setBrush(QColor(0,0,255));
-    RectItemR9 = new QGraphicsRectItem(0, 0, 30, 30);RectItemR9->setBrush(QColor(0,0,255));
-    RectItemR10 = new QGraphicsRectItem(0, 0, 30, 30);RectItemR10->setBrush(QColor(0,0,255));
-    RectItemR11 = new QGraphicsRectItem(0, 0, 30, 30);RectItemR11->setBrush(QColor(0,0,255));
-    RectItemR12 = new QGraphicsRectItem(0, 0, 30, 30);RectItemR12->setBrush(QColor(0,0,255));
-    RectItemR13 = new QGraphicsRectItem(0, 0, 30, 30);RectItemR13->setBrush(QColor(0,0,255));
-    RectItemR14 = new QGraphicsRectItem(0, 0, 30, 30);RectItemR14->setBrush(QColor(0,0,255));
-    RectItemR15 = new QGraphicsRectItem(0, 0, 30, 30);RectItemR15->setBrush(QColor(0,0,255));
-    RectItemR16 = new QGraphicsRectItem(0, 0, 30, 30);RectItemR16->setBrush(QColor(0,0,255));//set sensor Item color and size
+    ui->graphicsView_logo->setAlignment(Qt::AlignLeft | Qt::AlignTop);
+    ui->graphicsView_logo->setScene(scene_Logo);
+    ui->graphicsView_logo->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    ui->graphicsView_logo->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+
+    QSize viewSize = ui->graphicsView_logo->size();
+    QPixmap scaledPixmap = pixmap_Logo.scaled(viewSize);
+    item_Logo->setPixmap(scaledPixmap);
+
+    QRectF rect(0, 0, 65, 26);
+    qreal xRadius = 15;
+    qreal yRadius = 50;
+    RectItemL1 = new RoundedRectItem(rect, xRadius, yRadius);RectItemL1->setRotation(118);
+    RectItemL2 = new RoundedRectItem(rect, xRadius, yRadius);RectItemL2->setRotation(75);
+    RectItemL3 = new RoundedRectItem(rect, xRadius, yRadius);RectItemL3->setRotation(105);
+    RectItemL4 = new RoundedRectItem(rect, xRadius, yRadius);RectItemL4->setRotation(100);
+    RectItemL5 = new RoundedRectItem(rect, xRadius, yRadius);RectItemL5->setRotation(85);
+    RectItemL6 = new RoundedRectItem(rect, xRadius, yRadius);RectItemL6->setRotation(89);
+    RectItemL7 = new RoundedRectItem(rect, xRadius, yRadius);RectItemL7->setRotation(93);
+    RectItemL8 = new RoundedRectItem(rect, xRadius, yRadius);RectItemL8->setRotation(95);
+    RectItemL9 = new RoundedRectItem(rect, xRadius, yRadius);RectItemL9->setRotation(77);
+    RectItemL10 = new RoundedRectItem(rect, xRadius, yRadius);RectItemL10->setRotation(88);
+    RectItemL11 = new RoundedRectItem(rect, xRadius, yRadius);RectItemL11->setRotation(97);
+    RectItemL12 = new RoundedRectItem(rect, xRadius, yRadius);RectItemL12->setRotation(88);
+    RectItemL13 = new RoundedRectItem(rect, xRadius, yRadius);RectItemL13->setRotation(88);
+    RectItemL14 = new RoundedRectItem(rect, xRadius, yRadius);RectItemL14->setRotation(88);
+    RectItemL15 = new RoundedRectItem(rect, xRadius, yRadius);RectItemL15->setRotation(88);
+    RectItemL16 = new RoundedRectItem(rect, xRadius, yRadius);RectItemL16->setRotation(88);
+
+    RectItemR1 = new RoundedRectItem(rect, xRadius, yRadius);RectItemR1->setRotation(113);
+    RectItemR2 = new RoundedRectItem(rect, xRadius, yRadius);RectItemR2->setRotation(63);
+    RectItemR3 = new RoundedRectItem(rect, xRadius, yRadius);RectItemR3->setRotation(95);
+    RectItemR4 = new RoundedRectItem(rect, xRadius, yRadius);RectItemR4->setRotation(85);
+    RectItemR5 = new RoundedRectItem(rect, xRadius, yRadius);RectItemR5->setRotation(80);
+    RectItemR6 = new RoundedRectItem(rect, xRadius, yRadius);RectItemR6->setRotation(82);
+    RectItemR7 = new RoundedRectItem(rect, xRadius, yRadius);RectItemR7->setRotation(85);
+    RectItemR8 = new RoundedRectItem(rect, xRadius, yRadius);RectItemR8->setRotation(89);
+    RectItemR9 = new RoundedRectItem(rect, xRadius, yRadius);RectItemR9->setRotation(86);
+    RectItemR10 = new RoundedRectItem(rect, xRadius, yRadius);RectItemR10->setRotation(90);
+    RectItemR11 = new RoundedRectItem(rect, xRadius, yRadius);RectItemR11->setRotation(103);
+    RectItemR12 = new RoundedRectItem(rect, xRadius, yRadius);RectItemR12->setRotation(92);
+    RectItemR13 = new RoundedRectItem(rect, xRadius, yRadius);RectItemR13->setRotation(92);
+    RectItemR14 = new RoundedRectItem(rect, xRadius, yRadius);RectItemR14->setRotation(90);
+    RectItemR15 = new RoundedRectItem(rect, xRadius, yRadius);RectItemR15->setRotation(92);
+    RectItemR16 = new RoundedRectItem(rect, xRadius, yRadius);RectItemR16->setRotation(92);//set sensor Item color and size
 
     scene_Visualization->addItem(RectItemR1);scene_Visualization->addItem(RectItemL1);
     scene_Visualization->addItem(RectItemR2);scene_Visualization->addItem(RectItemL2);
@@ -174,22 +191,22 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent), ui(new Ui::MainWin
     scene_Visualization->addItem(RectItemR15);scene_Visualization->addItem(RectItemL15);
     scene_Visualization->addItem(RectItemR16);scene_Visualization->addItem(RectItemL16);
 
-    RectItemR1->setPos(275,105);RectItemL1->setPos(110,100);//set sensor Item position
-    RectItemR2->setPos(335,105);RectItemL2->setPos(170,100);
-    RectItemR3->setPos(270,180);RectItemL3->setPos(80,180);
-    RectItemR4->setPos(315,180);RectItemL4->setPos(130,180);
-    RectItemR5->setPos(370,180);RectItemL5->setPos(180,180);
-    RectItemR6->setPos(270,260);RectItemL6->setPos(70,260);
-    RectItemR7->setPos(320,260);RectItemL7->setPos(125,260);
-    RectItemR8->setPos(380,260);RectItemL8->setPos(180,260);
-    RectItemR9->setPos(275,350);RectItemL9->setPos(80,350);
-    RectItemR10->setPos(320,350);RectItemL10->setPos(130,350);
-    RectItemR11->setPos(370,350);RectItemL11->setPos(170,350);
-    RectItemR12->setPos(290,430);RectItemL12->setPos(90,430);
-    RectItemR13->setPos(325,430);RectItemL13->setPos(125,430);
-    RectItemR14->setPos(360,430);RectItemL14->setPos(165,430);
-    RectItemR15->setPos(300,540);RectItemL15->setPos(100,540);
-    RectItemR16->setPos(345,540);RectItemL16->setPos(155,540);
+    RectItemR1->setPos(315,100);RectItemL1->setPos(155,95);//set sensor Item position
+    RectItemR2->setPos(348,87);RectItemL2->setPos(192,88);
+    RectItemR3->setPos(295,165);RectItemL3->setPos(115,165);
+    RectItemR4->setPos(340,160);RectItemL4->setPos(165,160);
+    RectItemR5->setPos(390,160);RectItemL5->setPos(205,160);
+    RectItemR6->setPos(290,240);RectItemL6->setPos(99,245);
+    RectItemR7->setPos(347,240);RectItemL7->setPos(155,240);
+    RectItemR8->setPos(405,245);RectItemL8->setPos(210,240);
+    RectItemR9->setPos(300,330);RectItemL9->setPos(100,325);
+    RectItemR10->setPos(350,330);RectItemL10->setPos(155,325);
+    RectItemR11->setPos(405,335);RectItemL11->setPos(205,325);
+    RectItemR12->setPos(313,420);RectItemL12->setPos(118,417);
+    RectItemR13->setPos(352,420);RectItemL13->setPos(152,416);
+    RectItemR14->setPos(385,420);RectItemL14->setPos(192,414);
+    RectItemR15->setPos(327,525);RectItemL15->setPos(125,525);
+    RectItemR16->setPos(380,530);RectItemL16->setPos(180,520);
 
 
 
@@ -213,96 +230,96 @@ void MainWindow::toInstallEventFilter()
 
 bool MainWindow::eventFilter(QObject *target, QEvent *event) //change the buttom form with mouse movemoents
 {
-    if(target == ui->pushButton_VISUALIZATION)
-    {
-        if(event->type() == QEvent::HoverEnter)
-        {
-//            ui->pushButton_VISUALIZATION->setStyleSheet("QPushButton#pushButton_VISUALIZATION{border-radius: 8px;color: white;padding: 16px 32px;text-align: center;text-decoration: none;font-size: 16px;margin: 4px 2px;background-color: #e7e7e7;color: black;border: 2px solid #e7e7e7;}");
-           ui->pushButton_VISUALIZATION->setStyleSheet("QPushButton#pushButton_VISUALIZATION{    color: #b1b1b1;border-image: url('D:/GUI/demo/SMOLEs-desktop-application/image/button-background@2x.9.png') 0 0 0 0 stretch stretch;border-width: 1px;border-color: #1e1e1e;border-style: solid;border-radius: 6;padding: 3px;font-size: 12px;padding-left: 5px;padding-right: 5px;}");
-        }
+//    if(target == ui->pushButton_VISUALIZATION)
+//    {
+//        if(event->type() == QEvent::HoverEnter)
+//        {
+////            ui->pushButton_VISUALIZATION->setStyleSheet("QPushButton#pushButton_VISUALIZATION{border-radius: 8px;color: white;padding: 16px 32px;text-align: center;text-decoration: none;font-size: 16px;margin: 4px 2px;background-color: #e7e7e7;color: black;border: 2px solid #e7e7e7;}");
+//           ui->pushButton_VISUALIZATION->setStyleSheet("QPushButton#pushButton_VISUALIZATION{    color: #b1b1b1;border-image: url('D:/GUI/demo/SMOLEs-desktop-application/image/button-background@2x.9.png') 0 0 0 0 stretch stretch;border-width: 1px;border-color: #1e1e1e;border-style: solid;border-radius: 6;padding: 3px;font-size: 12px;padding-left: 5px;padding-right: 5px;}");
+//        }
 
-        if(event->type() == QEvent::HoverLeave)
-        {
-            ui->pushButton_VISUALIZATION->setStyleSheet("QPushButton#pushButton_VISUALIZATION{border-radius: 8px;color: white;padding: 16px 32px;text-align: center;text-decoration: none;font-size: 16px;margin: 4px 2px;background-color: white;color: black;border: 2px solid #e7e7e7;}");
-        }
+//        if(event->type() == QEvent::HoverLeave)
+//        {
+//            ui->pushButton_VISUALIZATION->setStyleSheet("QPushButton#pushButton_VISUALIZATION{border-radius: 8px;color: white;padding: 16px 32px;text-align: center;text-decoration: none;font-size: 16px;margin: 4px 2px;background-color: white;color: black;border: 2px solid #e7e7e7;}");
+//        }
 
-        if(event->type() == QEvent::MouseButtonPress)
-        {
-            ui->pushButton_VISUALIZATION->setStyleSheet("QPushButton#pushButton_VISUALIZATION{border-radius: 8px;color: white;padding: 16px 32px;text-align: center;text-decoration: none;font-size: 16px;margin: 4px 2px;background-color: #06AD56;color: black;border: 2px solid #e7e7e7;}");
-        }
-    }
+//        if(event->type() == QEvent::MouseButtonPress)
+//        {
+//            ui->pushButton_VISUALIZATION->setStyleSheet("QPushButton#pushButton_VISUALIZATION{border-radius: 8px;color: white;padding: 16px 32px;text-align: center;text-decoration: none;font-size: 16px;margin: 4px 2px;background-color: #06AD56;color: black;border: 2px solid #e7e7e7;}");
+//        }
+//    }
 
-    if(target == ui->pushButton_PAUSE)
-    {
-        if(event->type() == QEvent::HoverEnter)
-        {
-             ui->pushButton_PAUSE->setStyleSheet("QPushButton#pushButton_PAUSE{border-radius: 8px;color: white;padding: 16px 32px;text-align: center;text-decoration: none;font-size: 16px;margin: 4px 2px;background-color: #e7e7e7;color: black;border: 2px solid #e7e7e7;}");
-        }
+//    if(target == ui->pushButton_PAUSE)
+//    {
+//        if(event->type() == QEvent::HoverEnter)
+//        {
+//             ui->pushButton_PAUSE->setStyleSheet("QPushButton#pushButton_PAUSE{border-radius: 8px;color: white;padding: 16px 32px;text-align: center;text-decoration: none;font-size: 16px;margin: 4px 2px;background-color: #e7e7e7;color: black;border: 2px solid #e7e7e7;}");
+//        }
 
-        if(event->type() == QEvent::HoverLeave)
-        {
-            ui->pushButton_PAUSE->setStyleSheet("QPushButton#pushButton_PAUSE{border-radius: 8px;color: white;padding: 16px 32px;text-align: center;text-decoration: none;font-size: 16px;margin: 4px 2px;background-color: white;color: black;border: 2px solid #e7e7e7;}");
-        }
+//        if(event->type() == QEvent::HoverLeave)
+//        {
+//            ui->pushButton_PAUSE->setStyleSheet("QPushButton#pushButton_PAUSE{border-radius: 8px;color: white;padding: 16px 32px;text-align: center;text-decoration: none;font-size: 16px;margin: 4px 2px;background-color: white;color: black;border: 2px solid #e7e7e7;}");
+//        }
 
-        if(event->type() == QEvent::MouseButtonPress)
-        {
-            ui->pushButton_PAUSE->setStyleSheet("QPushButton#pushButton_PAUSE{border-radius: 8px;color: white;padding: 16px 32px;text-align: center;text-decoration: none;font-size: 16px;margin: 4px 2px;background-color: #ff0000;color: black;border: 2px solid #e7e7e7;}");
-        }
-    }
+//        if(event->type() == QEvent::MouseButtonPress)
+//        {
+//            ui->pushButton_PAUSE->setStyleSheet("QPushButton#pushButton_PAUSE{border-radius: 8px;color: white;padding: 16px 32px;text-align: center;text-decoration: none;font-size: 16px;margin: 4px 2px;background-color: #ff0000;color: black;border: 2px solid #e7e7e7;}");
+//        }
+//    }
 
-    if(target == ui->pushButton_BLUETOOTH)
-    {
-        if(event->type() == QEvent::HoverEnter)
-        {
-             ui->pushButton_BLUETOOTH->setStyleSheet("QPushButton#pushButton_BLUETOOTH{border-radius: 8px;color: white;padding: 16px 32px;text-align: center;text-decoration: none;font-size: 16px;margin: 4px 2px;background-color: #e7e7e7;color: black;border: 2px solid #e7e7e7;}");
-        }
+//    if(target == ui->pushButton_BLUETOOTH)
+//    {
+//        if(event->type() == QEvent::HoverEnter)
+//        {
+//             ui->pushButton_BLUETOOTH->setStyleSheet("QPushButton#pushButton_BLUETOOTH{border-radius: 8px;color: white;padding: 16px 32px;text-align: center;text-decoration: none;font-size: 16px;margin: 4px 2px;background-color: #e7e7e7;color: black;border: 2px solid #e7e7e7;}");
+//        }
 
-        if(event->type() == QEvent::HoverLeave)
-        {
-            ui->pushButton_BLUETOOTH->setStyleSheet("QPushButton#pushButton_BLUETOOTH{border-radius: 8px;color: white;padding: 16px 32px;text-align: center;text-decoration: none;font-size: 16px;margin: 4px 2px;background-color: white;color: black;border: 2px solid #e7e7e7;}");
-        }
+//        if(event->type() == QEvent::HoverLeave)
+//        {
+//            ui->pushButton_BLUETOOTH->setStyleSheet("QPushButton#pushButton_BLUETOOTH{border-radius: 8px;color: white;padding: 16px 32px;text-align: center;text-decoration: none;font-size: 16px;margin: 4px 2px;background-color: white;color: black;border: 2px solid #e7e7e7;}");
+//        }
 
-        if(event->type() == QEvent::MouseButtonPress)
-        {
-            ui->pushButton_BLUETOOTH->setStyleSheet("QPushButton#pushButton_BLUETOOTH{border-radius: 8px;color: white;padding: 16px 32px;text-align: center;text-decoration: none;font-size: 16px;margin: 4px 2px;background-color: #00FFFF;color: black;border: 2px solid #e7e7e7;}");
-        }
-    }
+//        if(event->type() == QEvent::MouseButtonPress)
+//        {
+//            ui->pushButton_BLUETOOTH->setStyleSheet("QPushButton#pushButton_BLUETOOTH{border-radius: 8px;color: white;padding: 16px 32px;text-align: center;text-decoration: none;font-size: 16px;margin: 4px 2px;background-color: #00FFFF;color: black;border: 2px solid #e7e7e7;}");
+//        }
+//    }
 
-    if(target == ui->pushButton_RECORD)
-    {
-        if(event->type() == QEvent::HoverEnter)
-        {
-             ui->pushButton_RECORD->setStyleSheet("QPushButton#pushButton_RECORD{border-radius: 8px;color: white;padding: 16px 32px;text-align: center;text-decoration: none;font-size: 16px;margin: 4px 2px;background-color: #e7e7e7;color: black;border: 2px solid #e7e7e7;}");
-        }
+//    if(target == ui->pushButton_RECORD)
+//    {
+//        if(event->type() == QEvent::HoverEnter)
+//        {
+//             ui->pushButton_RECORD->setStyleSheet("QPushButton#pushButton_RECORD{border-radius: 8px;color: white;padding: 16px 32px;text-align: center;text-decoration: none;font-size: 16px;margin: 4px 2px;background-color: #e7e7e7;color: black;border: 2px solid #e7e7e7;}");
+//        }
 
-        if(event->type() == QEvent::HoverLeave)
-        {
-            ui->pushButton_RECORD->setStyleSheet("QPushButton#pushButton_RECORD{border-radius: 8px;color: white;padding: 16px 32px;text-align: center;text-decoration: none;font-size: 16px;margin: 4px 2px;background-color: white;color: black;border: 2px solid #e7e7e7;}");
-        }
+//        if(event->type() == QEvent::HoverLeave)
+//        {
+//            ui->pushButton_RECORD->setStyleSheet("QPushButton#pushButton_RECORD{border-radius: 8px;color: white;padding: 16px 32px;text-align: center;text-decoration: none;font-size: 16px;margin: 4px 2px;background-color: white;color: black;border: 2px solid #e7e7e7;}");
+//        }
 
-        if(event->type() == QEvent::MouseButtonPress)
-        {
-            ui->pushButton_RECORD->setStyleSheet("QPushButton#pushButton_RECORD{border-radius: 8px;color: white;padding: 16px 32px;text-align: center;text-decoration: none;font-size: 16px;margin: 4px 2px;background-color: #5500ff;color: black;border: 2px solid #e7e7e7;}");
-        }
-    }
+//        if(event->type() == QEvent::MouseButtonPress)
+//        {
+//            ui->pushButton_RECORD->setStyleSheet("QPushButton#pushButton_RECORD{border-radius: 8px;color: white;padding: 16px 32px;text-align: center;text-decoration: none;font-size: 16px;margin: 4px 2px;background-color: #5500ff;color: black;border: 2px solid #e7e7e7;}");
+//        }
+//    }
 
-    if(target == ui->pushButton_CONTINUE)
-    {
-        if(event->type() == QEvent::HoverEnter)
-        {
-             ui->pushButton_CONTINUE->setStyleSheet("QPushButton#pushButton_CONTINUE{border-radius: 8px;color: white;padding: 16px 32px;text-align: center;text-decoration: none;font-size: 16px;margin: 4px 2px;background-color: #e7e7e7;color: black;border: 2px solid #e7e7e7;}");
-        }
+//    if(target == ui->pushButton_CONTINUE)
+//    {
+//        if(event->type() == QEvent::HoverEnter)
+//        {
+//             ui->pushButton_CONTINUE->setStyleSheet("QPushButton#pushButton_CONTINUE{border-radius: 8px;color: white;padding: 16px 32px;text-align: center;text-decoration: none;font-size: 16px;margin: 4px 2px;background-color: #e7e7e7;color: black;border: 2px solid #e7e7e7;}");
+//        }
 
-        if(event->type() == QEvent::HoverLeave)
-        {
-            ui->pushButton_CONTINUE->setStyleSheet("QPushButton#pushButton_CONTINUE{border-radius: 8px;color: white;padding: 16px 32px;text-align: center;text-decoration: none;font-size: 16px;margin: 4px 2px;background-color: white;color: black;border: 2px solid #e7e7e7;}");
-        }
+//        if(event->type() == QEvent::HoverLeave)
+//        {
+//            ui->pushButton_CONTINUE->setStyleSheet("QPushButton#pushButton_CONTINUE{border-radius: 8px;color: white;padding: 16px 32px;text-align: center;text-decoration: none;font-size: 16px;margin: 4px 2px;background-color: white;color: black;border: 2px solid #e7e7e7;}");
+//        }
 
-        if(event->type() == QEvent::MouseButtonPress)
-        {
-            ui->pushButton_CONTINUE->setStyleSheet("QPushButton#pushButton_CONTINUED{border-radius: 8px;color: white;padding: 16px 32px;text-align: center;text-decoration: none;font-size: 16px;margin: 4px 2px;background-color: #3300ff;color: black;border: 2px solid #e7e7e7;}");
-        }
-    }
+//        if(event->type() == QEvent::MouseButtonPress)
+//        {
+//            ui->pushButton_CONTINUE->setStyleSheet("QPushButton#pushButton_CONTINUED{border-radius: 8px;color: white;padding: 16px 32px;text-align: center;text-decoration: none;font-size: 16px;margin: 4px 2px;background-color: #3300ff;color: black;border: 2px solid #e7e7e7;}");
+//        }
+//    }
 
     return false;
 }
@@ -356,7 +373,10 @@ void MainWindow::on_pushButton_VISUALIZATION_clicked()
             if (!value.isObject()) continue;
             QJsonObject sensorDataObject = value.toObject();
 
-            timeStamp = sensorDataObject["timeStamp"].toInt();
+            timeStamp = sensorDataObject["timeStamp"].toString();
+//            std::string stdStr = std::to_string(timeStamp);//convert timestamp from str::string to QString
+//            QString str = QString::fromStdString(stdStr);
+            ui->textBrowser_TIMESTAMP->setText(timeStamp);
             leftFoot = sensorDataObject["leftFoot"].toBool();
             label = sensorDataObject["label"].toInt();
             sensorData = sensorDataObject["sensorData"].toArray();
@@ -528,7 +548,7 @@ void MainWindow::Set_Jsonfile_name()
 
 void MainWindow::Visualization_Reset()
 {
-    QList<QGraphicsRectItem*> RectItems =
+    QList<RoundedRectItem*> RectItems =
     {
         RectItemR1, RectItemR2, RectItemR3, RectItemR4, RectItemR5, RectItemR6,
         RectItemR7, RectItemR8, RectItemR9, RectItemR10, RectItemR11, RectItemR12,
@@ -586,13 +606,13 @@ void MainWindow::Visualization_one_sensor_group()
     for (const QJsonValue &sensorValue : sensorData)
     {
         int val = sensorValue.toInt();
-        qDebug() << "In json file" << Json_file_name << ",val of sensor group" << count_number_of_sensorData_Array  << "'s sensor " << count_single_sensorData_Array + 1 << "："<< val;
+//        qDebug() << "In json file" << Json_file_name << ",val of sensor group" << count_number_of_sensorData_Array  << "'s sensor " << count_single_sensorData_Array + 1 << "："<< val;
         int colorvalue = (int)(((val - minVal) / (double)(maxVal - minVal)) * 255);
-        qDebug() << "In json file" << Json_file_name << ",color of sensor group" << count_number_of_sensorData_Array << "'s sensor " << count_single_sensorData_Array + 1<< "：" << colorvalue;
+//        qDebug() << "In json file" << Json_file_name << ",color of sensor group" << count_number_of_sensorData_Array << "'s sensor " << count_single_sensorData_Array + 1<< "：" << colorvalue;
       if(leftFoot)
         {
 
-             QList<QGraphicsRectItem*> leftRectItems =
+             QList<RoundedRectItem*> leftRectItems =
              {
                  RectItemL1, RectItemL2, RectItemL3, RectItemL4, RectItemL5, RectItemL6,
                  RectItemL7, RectItemL8, RectItemL9, RectItemL10, RectItemL11, RectItemL12,
@@ -609,52 +629,83 @@ void MainWindow::Visualization_one_sensor_group()
              {
                  if(List_of_Checkbox_Left[count_single_sensorData_Array]->isChecked())
                  {
-                    QPointF point_(count_number_of_sensorData_Array + 1, val);
+                    QPointF point_(count_number_of_sensorData_Array,  val);
+//                    680 - (val / 5000 * 650) - 30
                     switch (count_single_sensorData_Array)
                     {
-                        case 0: {Point_List_Left[count_single_sensorData_Array].append(point_);break;}
-                        case 1: {Point_List_Left[count_single_sensorData_Array].append(point_);break;}
-                        case 2: {Point_List_Left[count_single_sensorData_Array].append(point_);break;}
-                        case 3: {Point_List_Left[count_single_sensorData_Array].append(point_);break;}
-                        case 4: {Point_List_Left[count_single_sensorData_Array].append(point_);break;}
+                        case 0: {
+                                    Draw_line_on_right_coordinate(Pre_Point_List_Left,count_single_sensorData_Array,point_,QPen(QColor(255, 0, 0)));
+                                    break;
+                                }
+                        case 1: {
+                                    Draw_line_on_right_coordinate(Pre_Point_List_Left,count_single_sensorData_Array,point_,QPen(QColor(0, 0, 255)));
+                                    break;
+                                }
+                        case 2: {
+                                    Draw_line_on_right_coordinate(Pre_Point_List_Left,count_single_sensorData_Array,point_,QPen(QColor(0, 255, 0)));
+                                    break;
+                                }
+                        case 3: {
+                                    Draw_line_on_right_coordinate(Pre_Point_List_Left,count_single_sensorData_Array,point_,QPen(QColor(0, 255, 255)));
+                                    break;
+                                }
+                        case 4: {
+                                    Draw_line_on_right_coordinate(Pre_Point_List_Left,count_single_sensorData_Array,point_,QPen(Qt::magenta));
+                                    break;
+                                }
                         case 5: {
-                                    if(count_number_of_sensorData_Array != 0)
-                                    {
-                                        scene_Pressure_value->addLine(QLineF(previousPoint_.x(), previousPoint_.y(), point_.x()*10, 600 - point_.y() - 2), QPen(Qt::yellow));
-                                    }
-                                    previousPoint_ = QPointF(point_.x()*10, 600 - point_.y() - 2);
+                                    Draw_line_on_right_coordinate(Pre_Point_List_Left,count_single_sensorData_Array,point_,QPen(QColor(255, 165, 0)));
                                     break;
                                 }
                         case 6:{
-                                    if(count_number_of_sensorData_Array != 0)
-                                    {
-                                        scene_Pressure_value->addLine(QLineF(previousPoint.x(), previousPoint.y(), point_.x()*10, 600 - point_.y() - 2), pen_Pressure_value);
-                                    }
-                                    previousPoint = QPointF(point_.x()*10, 600 - point_.y() - 2);
+                                    Draw_line_on_right_coordinate(Pre_Point_List_Left,count_single_sensorData_Array,point_,QPen(Qt::white));
                                     break;
                                 }
-                        case 7: Point_List_Left[count_single_sensorData_Array].append(point_);
-                        case 8: Point_List_Left[count_single_sensorData_Array].append(point_);
-                        case 9: Point_List_Left[count_single_sensorData_Array].append(point_);
-                        case 10: Point_List_Left[count_single_sensorData_Array].append(point_);
-                        case 11: Point_List_Left[count_single_sensorData_Array].append(point_);
-                        case 12: Point_List_Left[count_single_sensorData_Array].append(point_);
-                        case 13: Point_List_Left[count_single_sensorData_Array].append(point_);
-                        case 14: Point_List_Left[count_single_sensorData_Array].append(point_);
-                        case 15: Point_List_Left[count_single_sensorData_Array].append(point_);
+                        case 7:{
+                                Draw_line_on_right_coordinate(Pre_Point_List_Left,count_single_sensorData_Array,point_,QPen(QColor(255, 192, 203)));
+                                break;
+                            }
+                        case 8:{
+                                Draw_line_on_right_coordinate(Pre_Point_List_Left,count_single_sensorData_Array,point_,QPen(QColor(0, 255, 0)));
+                                break;
+                            }
+                        case 9: {
+                                Draw_line_on_right_coordinate(Pre_Point_List_Left,count_single_sensorData_Array,point_,QPen(QColor(255, 215, 0)));
+                                break;
+                            }
+                        case 10:{
+                                Draw_line_on_right_coordinate(Pre_Point_List_Left,count_single_sensorData_Array,point_,QPen(QColor(238, 130, 238)));
+                                break;
+                            }
+                        case 11:{
+                                Draw_line_on_right_coordinate(Pre_Point_List_Left,count_single_sensorData_Array,point_,QPen(QColor(144, 238, 144)));
+                                break;
+                            }
+                        case 12:{
+                                Draw_line_on_right_coordinate(Pre_Point_List_Left,count_single_sensorData_Array,point_,QPen(QColor(240, 128, 128)));
+                                break;
+                            }
+                        case 13:{
+                                Draw_line_on_right_coordinate(Pre_Point_List_Left,count_single_sensorData_Array,point_,QPen(QColor(240, 230, 140)));
+                                break;
+                            }
+                        case 14:{
+                                Draw_line_on_right_coordinate(Pre_Point_List_Left,count_single_sensorData_Array,point_,QPen(QColor(64, 224, 208)));
+                                break;
+                            }
+                        case 15:{
+                                Draw_line_on_right_coordinate(Pre_Point_List_Left,count_single_sensorData_Array,point_,QPen(QColor(255, 160, 122)));
+                                break;
+                            }
                     }
-//                    Point_List_Left[count_single_sensorData_Array].append(point_);
-//                    scene_Pressure_value->addEllipse(point_.x()*10, 600 - (point_.y() + 10) - 2, 10, 10, pen_Pressure_value, brush_);
                  }
-
-//                 leftTextBrowsers[count_single_sensorData_Array]->setText(str);
-                 leftRectItems[count_single_sensorData_Array]->setBrush(QColor(0,0,255));
-                 leftRectItems[count_single_sensorData_Array]->setBrush(QColor(colorvalue,0,255 - colorvalue));
+//                 leftRectItems[count_single_sensorData_Array]->setBrush(QColor(0,0,255));
+                 leftRectItems[count_single_sensorData_Array]->setColor(QColor(colorvalue,0,255 - colorvalue));
              }
         }
         else
         {
-              QList<QGraphicsRectItem*> rightRectItems =
+              QList<RoundedRectItem*> rightRectItems =
               {
                   RectItemR1, RectItemR2, RectItemR3, RectItemR4, RectItemR5, RectItemR6,
                   RectItemR7, RectItemR8, RectItemR9, RectItemR10, RectItemR11, RectItemR12,
@@ -670,32 +721,80 @@ void MainWindow::Visualization_one_sensor_group()
 
               if(List_of_Checkbox_Right[count_single_sensorData_Array]->isChecked())
               {
-                 QPointF point_(count_number_of_sensorData_Array + 1, val);
+                 QPointF point_(count_number_of_sensorData_Array, val);
                  switch (count_single_sensorData_Array)
                  {
-                     case 0: Point_List_Right[count_single_sensorData_Array].append(point_);
-                     case 1: Point_List_Right[count_single_sensorData_Array].append(point_);
-                     case 2: Point_List_Right[count_single_sensorData_Array].append(point_);
-                     case 3: Point_List_Right[count_single_sensorData_Array].append(point_);
-                     case 4: Point_List_Right[count_single_sensorData_Array].append(point_);
-                     case 5: Point_List_Right[count_single_sensorData_Array].append(point_);
-                     case 6: Point_List_Right[count_single_sensorData_Array].append(point_);scene_Pressure_value->addEllipse(point_.x() - 2, 100 - point_.y() - 2, 4, 4, pen_Pressure_value, brush_);
-                     case 7: Point_List_Right[count_single_sensorData_Array].append(point_);
-                     case 8: Point_List_Right[count_single_sensorData_Array].append(point_);
-                     case 9: Point_List_Right[count_single_sensorData_Array].append(point_);
-                     case 10: Point_List_Right[count_single_sensorData_Array].append(point_);
-                     case 11: Point_List_Right[count_single_sensorData_Array].append(point_);
-                     case 12: Point_List_Right[count_single_sensorData_Array].append(point_);
-                     case 13: Point_List_Right[count_single_sensorData_Array].append(point_);
-                     case 14: Point_List_Right[count_single_sensorData_Array].append(point_);
-                     case 15: Point_List_Right[count_single_sensorData_Array].append(point_);
+                     case 0:{
+                                 Draw_line_on_right_coordinate(Pre_Point_List_Left,count_single_sensorData_Array,point_,QPen(QColor(255, 0, 0)));
+                                 break;
+                             }
+                     case 1:{
+                     Draw_line_on_right_coordinate(Pre_Point_List_Left,count_single_sensorData_Array,point_,QPen(QColor(0, 0, 255)));
+                     break;
+                 }
+                     case 2:{
+                     Draw_line_on_right_coordinate(Pre_Point_List_Left,count_single_sensorData_Array,point_,QPen(QColor(0, 255, 0)));
+                     break;
+                 }
+                     case 3:{
+                     Draw_line_on_right_coordinate(Pre_Point_List_Left,count_single_sensorData_Array,point_,QPen(QColor(0, 255, 255)));
+                     break;
+                 }
+                     case 4:{
+                     Draw_line_on_right_coordinate(Pre_Point_List_Left,count_single_sensorData_Array,point_,QPen(Qt::magenta));
+                     break;
+                 }
+                     case 5:{
+                     Draw_line_on_right_coordinate(Pre_Point_List_Left,count_single_sensorData_Array,point_,QPen(QColor(255, 165, 0)));
+                     break;
+                 }
+                     case 6:{
+                     Draw_line_on_right_coordinate(Pre_Point_List_Left,count_single_sensorData_Array,point_,QPen(Qt::white));
+                     break;
+                 }
+                     case 7:{
+                     Draw_line_on_right_coordinate(Pre_Point_List_Left,count_single_sensorData_Array,point_,QPen(QColor(255, 192, 203)));
+                     break;
+                 }
+                     case 8:{
+                     Draw_line_on_right_coordinate(Pre_Point_List_Left,count_single_sensorData_Array,point_,QPen(QColor(0, 255, 0)));
+                     break;
+                 }
+                     case 9:{
+                     Draw_line_on_right_coordinate(Pre_Point_List_Left,count_single_sensorData_Array,point_,QPen(QColor(255, 215, 0)));
+                     break;
+                 }
+                     case 10:{
+                     Draw_line_on_right_coordinate(Pre_Point_List_Left,count_single_sensorData_Array,point_,QPen(QColor(238, 130, 238)));
+                     break;
+                 }
+                     case 11:{
+                     Draw_line_on_right_coordinate(Pre_Point_List_Left,count_single_sensorData_Array,point_,QPen(QColor(144, 238, 144)));
+                     break;
+                 }
+                     case 12:{
+                     Draw_line_on_right_coordinate(Pre_Point_List_Left,count_single_sensorData_Array,point_,QPen(QColor(240, 128, 128)));
+                     break;
+                 }
+                     case 13:{
+                     Draw_line_on_right_coordinate(Pre_Point_List_Left,count_single_sensorData_Array,point_,QPen(QColor(240, 230, 140)));
+                     break;
+                 }
+                     case 14:{
+                     Draw_line_on_right_coordinate(Pre_Point_List_Left,count_single_sensorData_Array,point_,QPen(QColor(64, 224, 208)));
+                     break;
+                 }
+                     case 15:{
+                     Draw_line_on_right_coordinate(Pre_Point_List_Left,count_single_sensorData_Array,point_,QPen(QColor(255, 160, 122)));
+                     break;
+                 }
                  }
               }
 
               if (count_single_sensorData_Array < rightRectItems.size()) {
 //                  rightTextBrowsers[count_single_sensorData_Array]->setText(str);
-                  rightRectItems[count_single_sensorData_Array]->setBrush(QColor(0,0,255));
-                  rightRectItems[count_single_sensorData_Array]->setBrush(QColor(colorvalue,0,255 - colorvalue));
+//                  rightRectItems[count_single_sensorData_Array]->setBrush(QColor(0,0,255));
+                  rightRectItems[count_single_sensorData_Array]->setColor(QColor(colorvalue,0,255 - colorvalue));
               }
           }
          count_single_sensorData_Array++;
@@ -704,7 +803,7 @@ void MainWindow::Visualization_one_sensor_group()
 
 void MainWindow::SLOT_of_Sliderdropped()
 {
-    QList<QGraphicsRectItem*> RectItems_ =
+    QList<RoundedRectItem*> RectItems_ =
     {
         RectItemR1, RectItemR2, RectItemR3, RectItemR4, RectItemR5, RectItemR6,
         RectItemR7, RectItemR8, RectItemR9, RectItemR10, RectItemR11, RectItemR12,
@@ -727,13 +826,13 @@ void MainWindow::SLOT_of_Sliderdropped()
 
 void MainWindow::Visualization_after_Slider_dropped(int count_number)
 {
-    QList<QGraphicsRectItem*> leftRectItems_ =
+    QList<RoundedRectItem*> leftRectItems_ =
     {
         RectItemL1, RectItemL2, RectItemL3, RectItemL4, RectItemL5, RectItemL6,
         RectItemL7, RectItemL8, RectItemL9, RectItemL10, RectItemL11, RectItemL12,
         RectItemL13, RectItemL14, RectItemL15, RectItemL16
     };
-    QList<QGraphicsRectItem*> rightRectItems_ =
+    QList<RoundedRectItem*> rightRectItems_ =
     {
         RectItemR1, RectItemR2, RectItemR3, RectItemR4, RectItemR5, RectItemR6,
         RectItemR7, RectItemR8, RectItemR9, RectItemR10, RectItemR11, RectItemR12,
@@ -781,6 +880,33 @@ void MainWindow::Visualization_after_Slider_dropped(int count_number)
     }
 }
 
+void MainWindow::Draw_line_on_right_coordinate(QList<QPointF>& Pre_point_list, int count_single_sensorData_Array_, QPointF point__,QPen pen)
+{
+
+    if(count_number_of_sensorData_Array != 0)
+    {
+        qDebug() << "X坐标：" << Pre_point_list[count_single_sensorData_Array_].x() << "Y坐标: " << Pre_point_list[count_single_sensorData_Array_].y();
+        scene_Pressure_value->addLine(QLineF(Pre_point_list[count_single_sensorData_Array_].x(), Pre_Point_List_Left[count_single_sensorData_Array_].y(), 50 + point__.x()*10, 680 - (point__.y() / 5000 * 650)), pen);
+        Pre_point_list[count_single_sensorData_Array_] = QPointF(50 + point__.x()*10, 680 - (point__.y() / 5000 * 650));
+    }
+    else if(count_number_of_sensorData_Array == 0)
+    {
+        Pre_point_list[count_single_sensorData_Array_] = QPoint(50 + point__.x(), 680 - (point__.y() / 5000 * 650));
+        qDebug() << "X坐标：" << Pre_point_list[count_single_sensorData_Array_].x() << "Y坐标: " << Pre_point_list[count_single_sensorData_Array_].y();
+    };
 
 
+//    qreal x = point__.x() * 10;
+//    qreal y = 600 - point__.y() - 2;
+
+//    if(count_single_sensorData_Array_ != 0)
+//    {
+//        if (Pre_point_list[count_single_sensorData_Array_].x() == 0 && Pre_point_list[count_single_sensorData_Array_].y() == 0)
+//        {
+//            Pre_point_list[count_single_sensorData_Array_] = QPointF(0, y);
+//        }
+//        scene_Pressure_value->addLine(QLineF(Pre_point_list[count_single_sensorData_Array_].x(), Pre_point_list[count_single_sensorData_Array_].y(), x, y), pen);
+//    }
+//    Pre_point_list[count_single_sensorData_Array_] = QPointF(x, y);
+}
 
