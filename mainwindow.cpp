@@ -43,12 +43,13 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent), ui(new Ui::MainWin
     ui->horizontalSlider->setValue(Slider_value);
     connect(ui->horizontalSlider,SIGNAL(sliderMoved(int)),this,SLOT(on_pushButton_PAUSE_clicked()));
     connect(ui->horizontalSlider,SIGNAL(sliderReleased()),this, SLOT(SLOT_of_Sliderdropped()));
+//    connect(ui->textBrowser_TIMESTAMP->document(), SIGNAL(contentsChanged()),this,SLOT(Slider_slide()));
 
 
     ui->comboBox->addItem(Combobox_defaultValue);
     ui->comboBox->setCurrentText(Combobox_defaultValue);
-    connect(ui->comboBox,SIGNAL(currentIndexChanged(int)),this,SLOT(Set_Jsonfile_name()));
-    connect(ui->comboBox,SIGNAL(currentIndexChanged(int)),this,SLOT(Reset_Confirmwindow()));
+//    connect(ui->comboBox,SIGNAL(currentIndexChanged(int)),this,SLOT(Set_Jsonfile_name()));
+    connect(ui->comboBox,SIGNAL(currentIndexChanged(int)),this,SLOT(Run_visualization_automaticaly_window()));
 
     ui->pushButton_VISUALIZATION->setIcon(style()->standardIcon(QStyle::SP_MediaPlay));//set icon of buttons
     ui->pushButton_PAUSE->setIcon(style()->standardIcon(QStyle::SP_MediaPause));
@@ -78,8 +79,12 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent), ui(new Ui::MainWin
 
     scene_Pressure_value = new QGraphicsScene(this);//set QGraphicsScene of Pressure value
     ui->graphicsView_2->setAlignment(Qt::AlignLeft | Qt::AlignBottom);
-    scene_Pressure_value->setSceneRect(0,0,710,710);
+    scene_Pressure_value->setSceneRect(0,0,790,710);
     ui->graphicsView_2->setScene(scene_Pressure_value);
+
+    lineGroup = new QGraphicsItemGroup();
+    scene_Pressure_value->addItem(lineGroup);
+
     // set Pen of Pressure value graph
     pen_Pressure_value.setColor(Qt::white);
     pen_Pressure_value.setWidth(2);
@@ -88,39 +93,37 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent), ui(new Ui::MainWin
     ui->graphicsView_2->setRenderHint(QPainter::Antialiasing);
 
     // draw X and Yaxis
-    scene_Pressure_value->addLine(QLineF(50, 680, 700, 680), pen_Pressure_value); // X axis
+    scene_Pressure_value->addLine(QLineF(50, 680, 800, 680), pen_Pressure_value); // X axis
     scene_Pressure_value->addLine(QLineF(50, 680, 50, 30), pen_Pressure_value); // Y axis
-//    ui->graphicsView_2->fitInView(scene_Pressure_value->sceneRect(), Qt::KeepAspectRatio);
 
-//    // Add arrows to the axes
-//    QPolygonF arrowHeadX;
-//    arrowHeadX << QPointF(700, 680) << QPointF(690, 6970) << QPointF(690, 690);
-//    QPolygonF arrowHeadY;
-//    arrowHeadY << QPointF(50, 50) << QPointF(60, 60) << QPointF(40, 60);
-//    scene_Pressure_value->addPolygon(arrowHeadX, pen_Pressure_value, brush_);
-//    scene_Pressure_value->addPolygon(arrowHeadY, pen_Pressure_value, brush_);
+    // Define the Y axis scale factor
+    const qreal scaleFactorY = 5000.0 / 650.0;
 
-    // Define the scale factor
-    const qreal scaleFactor = 5000.0 / 650.0;
+    // Define the scale factor for X axis (0-800 range)
+    const qreal scaleFactorX = 60 / 750.0; // 700 is the length of X axis in pixels (750 - 50)
 
-    // Add tick marks to the X and Y axes
+
+    // Add tick marks to the Y axes
     for(int i = 0; i <= 650; i += 50)
     {
-        scene_Pressure_value->addLine(QLineF(50 + i, 675, 50 + i, 685), pen_Pressure_value); // X axis ticks
         scene_Pressure_value->addLine(QLineF(45, 680 - i, 55, 680 - i), pen_Pressure_value); // Y axis ticks
 
-        // X axis labels
-        QGraphicsTextItem *textX = scene_Pressure_value->addText(QString::number(static_cast<int>(i * scaleFactor)));
-        textX->setDefaultTextColor(Qt::white);
-        textX->setPos(50 + i - 10, 690); // Adjust position to center the text
-
         // Y axis labels
-        QGraphicsTextItem *textY = scene_Pressure_value->addText(QString::number(static_cast<int>(i * scaleFactor)));
+        QGraphicsTextItem *textY = scene_Pressure_value->addText(QString::number(static_cast<int>(i * scaleFactorY)));
         textY->setDefaultTextColor(Qt::white);
         textY->setPos(5, 680 - i - 10); // Adjust position to center the text
     }
 
+    // Add tick marks to the X axes
+    for(int i = 0; i <= 750; i += 50)
+    {
+        scene_Pressure_value->addLine(QLineF(50 + i, 675, 50 + i, 685), pen_Pressure_value); // X axis ticks
 
+        // X axis labels
+        QGraphicsTextItem *textX = scene_Pressure_value->addText(QString::number(static_cast<int>(i * scaleFactorX)));
+        textX->setDefaultTextColor(Qt::white);
+        textX->setPos(50 + i -10, 690); // Adjust position to center the text
+    }
 
     scene_Logo = new QGraphicsScene(this);//set QGraphicsScene of Logo
     scene_Logo->setSceneRect(0,0,881,161);
@@ -234,7 +237,7 @@ bool MainWindow::eventFilter(QObject *target, QEvent *event) //change the buttom
 //    {
 //        if(event->type() == QEvent::HoverEnter)
 //        {
-////            ui->pushButton_VISUALIZATION->setStyleSheet("QPushButton#pushButton_VISUALIZATION{border-radius: 8px;color: white;padding: 16px 32px;text-align: center;text-decoration: none;font-size: 16px;margin: 4px 2px;background-color: #e7e7e7;color: black;border: 2px solid #e7e7e7;}");
+//            ui->pushButton_VISUALIZATION->setStyleSheet("QPushButton#pushButton_VISUALIZATION{border-radius: 8px;color: white;padding: 16px 32px;text-align: center;text-decoration: none;font-size: 16px;margin: 4px 2px;background-color: #e7e7e7;color: black;border: 2px solid #e7e7e7;}");
 //           ui->pushButton_VISUALIZATION->setStyleSheet("QPushButton#pushButton_VISUALIZATION{    color: #b1b1b1;border-image: url('D:/GUI/demo/SMOLEs-desktop-application/image/button-background@2x.9.png') 0 0 0 0 stretch stretch;border-width: 1px;border-color: #1e1e1e;border-style: solid;border-radius: 6;padding: 3px;font-size: 12px;padding-left: 5px;padding-right: 5px;}");
 //        }
 
@@ -340,13 +343,12 @@ void MainWindow::on_pushButton_VISUALIZATION_clicked()
         {
             sign_of_checkbox = true;
         }
-    }
+    }  
 
     if(sign_of_checkbox == true)
     {
         jsonObjects.clear();
         QString filepath = headfilepath;
-        qDebug() << 1;
         qDebug() << filepath;
         QString current_filepath = filepath + "\\" + Json_file_name;
         qDebug() << current_filepath;
@@ -363,10 +365,36 @@ void MainWindow::on_pushButton_VISUALIZATION_clicked()
         QJsonObject rootObject = document.object();
         sensorDataArray = rootObject["SensorDataPackage"].toArray();
 
+        for (const QJsonValue &value : sensorDataArray) {
+                QJsonObject sensorDataObject = value.toObject();
+                QString timeStamp__ = sensorDataObject["timeStamp"].toString();
+
+                // 提取最后一位秒数
+                QStringList timeParts = timeStamp__.split(":");
+                if (timeParts.size() == 6) {
+                    int seconds = timeParts.last().toInt();
+                    // 检查是否加入QList
+                    if (uniqueSeconds.isEmpty()) {
+                        uniqueSeconds.append(seconds);
+                        lastAddedSecond = seconds;
+                    } else if (!uniqueSeconds.contains(seconds)) {
+                        uniqueSeconds.append(seconds);
+                        lastAddedSecond = seconds;
+                    } else if (seconds == uniqueSeconds.first() && !firstSecondAddedAgain && lastAddedSecond != seconds) {
+                        uniqueSeconds.append(seconds);
+                        firstSecondAddedAgain = true;
+                    }
+                }
+            }
+
+//        for (int second : uniqueSeconds) {
+//            qDebug() << second;
+//        }
+
         for (count_number_of_sensorData_Array = 0; count_number_of_sensorData_Array < sensorDataArray.size(); count_number_of_sensorData_Array++)
         {
             do{
-                Delay_MSec(100);
+                Delay_MSec(10);
             }while(pauseindex);
 
             const QJsonValue &value = sensorDataArray[count_number_of_sensorData_Array];
@@ -374,8 +402,14 @@ void MainWindow::on_pushButton_VISUALIZATION_clicked()
             QJsonObject sensorDataObject = value.toObject();
 
             timeStamp = sensorDataObject["timeStamp"].toString();
-//            std::string stdStr = std::to_string(timeStamp);//convert timestamp from str::string to QString
-//            QString str = QString::fromStdString(stdStr);
+            QString new_lastPart = timeStamp.section(':', -1);  // get last part of timeStamp
+
+            if (!previous_last_bit_TimeStamp.isEmpty() && previous_last_bit_TimeStamp != new_lastPart) {
+                Pre_Slider_value = ui->horizontalSlider->value();
+                Slider_value++;
+                ui->horizontalSlider->setValue(Slider_value);
+            }
+
             ui->textBrowser_TIMESTAMP->setText(timeStamp);
             leftFoot = sensorDataObject["leftFoot"].toBool();
             label = sensorDataObject["label"].toInt();
@@ -393,9 +427,8 @@ void MainWindow::on_pushButton_VISUALIZATION_clicked()
             }
 
             MainWindow::Visualization_one_sensor_group();
-            Slider_value++;
-            ui->horizontalSlider->setValue(Slider_value);
-            Delay_MSec(200);
+            previous_last_bit_TimeStamp = new_lastPart;
+            Delay_MSec(10);
          }
     }
     else
@@ -461,9 +494,19 @@ void MainWindow::on_pushButton_CONTINUE_clicked()
 
 void MainWindow::on_pushButton_FORWARD_clicked()
 {
-    if((pauseindex == true) && (count_number_of_sensorData_Array < 59))
+    if (count_number_of_sensorData_Array < sensorDataArray.size() - 1)
     {
-        count_number_of_sensorData_Array++;
+        Slider_value = ui->horizontalSlider->value();
+        Pre_Slider_value = ui->horizontalSlider->value();
+        if (Slider_value < ui->horizontalSlider->maximum())
+        {
+            Slider_value++;
+            ui->horizontalSlider->setValue(Slider_value);
+
+            // 手动调用滑块释放的槽函数
+            SLOT_of_Sliderdropped();
+        }
+
         qDebug() << "forward to sensor group:" << count_number_of_sensorData_Array;
     }
 }
@@ -471,24 +514,38 @@ void MainWindow::on_pushButton_FORWARD_clicked()
 
 void MainWindow::on_pushButton_REWIND_clicked()
 {
-    if((pauseindex == true) && (count_number_of_sensorData_Array < 59))
-    {
-        count_number_of_sensorData_Array--;
-        qDebug() << "rewind to sensor group:" << count_number_of_sensorData_Array;
-    }
+    if (count_number_of_sensorData_Array > 0)
+        {
+            Slider_value = ui->horizontalSlider->value();
+            Pre_Slider_value = ui->horizontalSlider->value();
+            if (Slider_value > ui->horizontalSlider->minimum())
+            {
+                Slider_value--;
+                ui->horizontalSlider->setValue(Slider_value);
+
+                // 手动调用滑块释放的槽函数
+                SLOT_of_Sliderdropped();
+            }
+
+            qDebug() << "rewind to sensor group:" << count_number_of_sensorData_Array;
+        }
 }
 
 void MainWindow::on_pushButton_ANALYSIS_clicked()
 {
-    QString scriptPath = "D:\\GUI\\demo\\SMOLEs-desktop-application\\test.py";
+    QString scriptPath = "D:\\GUI\\demo\\SMOLEs-desktop-application\\test1.py";
 
-    QString cmd_qt = QString("python %1").arg(scriptPath);
+    QString cmd_qt = QString("conda activate smoles && python %1").arg(scriptPath);
 
     const char* cmd = cmd_qt.toLocal8Bit().constData();// convert the string to cmd command
 
     system(cmd);
 }
 
+void MainWindow::on_pushButton_RESET_clicked()
+{
+    Reset();
+}
 
 int MainWindow::FindFile2(const QString& _filePath)
 {
@@ -559,28 +616,30 @@ void MainWindow::Visualization_Reset()
 
     for (int i = 0; i < RectItems.size();i++)
     {
-        RectItems[i]->setBrush(QColor(0,0,255));
-    }
-
-    for (int i = 0; i < 50; ++i) {
-        qDebug() << endl;
+        RectItems[i]->setColor(QColor(0,0,255));
     }
 
     Slider_value = 0;
-    QMessageBox::StandardButton reply;
-    reply = QMessageBox::question(this, "select", "Do you want to automatically run visualization for new Json file?",
-                                  QMessageBox::Yes | QMessageBox::No);
-    if (reply == QMessageBox::Yes && pauseindex == true)
-    {
-        pauseindex = false;
-        ui->pushButton_VISUALIZATION->click();
-    }
-    else if(reply == QMessageBox::Yes && (!pauseindex == true))
-    {
-        ui->pushButton_VISUALIZATION->click();
-    }
+    ui->horizontalSlider->setValue(Slider_value);
 
+    ui->textBrowser_TIMESTAMP->clear();
+    count_number_of_sensorData_Array = 0;
+    pauseindex = true;
 
+    uniqueSeconds.clear();
+    firstSecondAddedAgain = false;
+    lastAddedSecond = -1;
+}
+
+void MainWindow::Pressure_value_Reset()
+{
+    clearLines();
+}
+
+void MainWindow::Reset()
+{
+    Visualization_Reset();
+    Pressure_value_Reset();
 }
 
 void MainWindow::Reset_Confirmwindow()//jump out a window let the user confirm whether they want to reset the visualization
@@ -590,14 +649,45 @@ void MainWindow::Reset_Confirmwindow()//jump out a window let the user confirm w
                                   QMessageBox::Yes | QMessageBox::No);
     if (reply == QMessageBox::Yes && pauseindex == false)
     {
-
         Visualization_Reset();
     }
     else if(reply == QMessageBox::Yes && pauseindex == true)
     {
         Visualization_Reset();
-        pauseindex = false;
     }
+}
+
+void MainWindow::Run_visualization_automaticaly_window()
+{
+        QMessageBox::StandardButton reply;
+        reply = QMessageBox::question(this, "select", "Do you want to automatically run visualization for new Json file?",
+                                      QMessageBox::Yes | QMessageBox::No);
+        if (reply == QMessageBox::Yes && pauseindex == true)
+        {
+            ui->pushButton_RESET->click();
+            pauseindex = false;
+            Set_Jsonfile_name();
+            ui->pushButton_VISUALIZATION->click();
+        }
+        else if(reply == QMessageBox::Yes && (!pauseindex == true))
+        {
+            ui->pushButton_RESET->click();
+            pauseindex = false;
+            Set_Jsonfile_name();
+            ui->pushButton_VISUALIZATION->click();
+        }
+        else if (reply == QMessageBox::No && pauseindex == true)
+        {
+            ui->pushButton_RESET->click();
+            Set_Jsonfile_name();
+            QMessageBox::information(0,"Info","When you want, you need to click the PLAY button or continue button to start the viusalisation of new File");
+        }
+        else if(reply == QMessageBox::No && (!pauseindex == true))
+        {
+            ui->pushButton_RESET->click();
+            Set_Jsonfile_name();
+            QMessageBox::information(0,"Info","When you want, you need to click the PLAY button or continue button to start the viusalisation of new File");
+        }
 }
 
 void MainWindow::Visualization_one_sensor_group()
@@ -699,7 +789,6 @@ void MainWindow::Visualization_one_sensor_group()
                             }
                     }
                  }
-//                 leftRectItems[count_single_sensorData_Array]->setBrush(QColor(0,0,255));
                  leftRectItems[count_single_sensorData_Array]->setColor(QColor(colorvalue,0,255 - colorvalue));
              }
         }
@@ -725,75 +814,73 @@ void MainWindow::Visualization_one_sensor_group()
                  switch (count_single_sensorData_Array)
                  {
                      case 0:{
-                                 Draw_line_on_right_coordinate(Pre_Point_List_Left,count_single_sensorData_Array,point_,QPen(QColor(255, 0, 0)));
+                                 Draw_line_on_right_coordinate(Pre_Point_List_Right,count_single_sensorData_Array,point_,QPen(QColor(255, 0, 0)));
                                  break;
                              }
                      case 1:{
-                     Draw_line_on_right_coordinate(Pre_Point_List_Left,count_single_sensorData_Array,point_,QPen(QColor(0, 0, 255)));
+                     Draw_line_on_right_coordinate(Pre_Point_List_Right,count_single_sensorData_Array,point_,QPen(QColor(0, 0, 255)));
                      break;
                  }
                      case 2:{
-                     Draw_line_on_right_coordinate(Pre_Point_List_Left,count_single_sensorData_Array,point_,QPen(QColor(0, 255, 0)));
+                     Draw_line_on_right_coordinate(Pre_Point_List_Right,count_single_sensorData_Array,point_,QPen(QColor(0, 255, 0)));
                      break;
                  }
                      case 3:{
-                     Draw_line_on_right_coordinate(Pre_Point_List_Left,count_single_sensorData_Array,point_,QPen(QColor(0, 255, 255)));
+                     Draw_line_on_right_coordinate(Pre_Point_List_Right,count_single_sensorData_Array,point_,QPen(QColor(0, 255, 255)));
                      break;
                  }
                      case 4:{
-                     Draw_line_on_right_coordinate(Pre_Point_List_Left,count_single_sensorData_Array,point_,QPen(Qt::magenta));
+                     Draw_line_on_right_coordinate(Pre_Point_List_Right,count_single_sensorData_Array,point_,QPen(Qt::magenta));
                      break;
                  }
                      case 5:{
-                     Draw_line_on_right_coordinate(Pre_Point_List_Left,count_single_sensorData_Array,point_,QPen(QColor(255, 165, 0)));
+                     Draw_line_on_right_coordinate(Pre_Point_List_Right,count_single_sensorData_Array,point_,QPen(QColor(255, 165, 0)));
                      break;
                  }
                      case 6:{
-                     Draw_line_on_right_coordinate(Pre_Point_List_Left,count_single_sensorData_Array,point_,QPen(Qt::white));
+                     Draw_line_on_right_coordinate(Pre_Point_List_Right,count_single_sensorData_Array,point_,QPen(Qt::white));
                      break;
                  }
                      case 7:{
-                     Draw_line_on_right_coordinate(Pre_Point_List_Left,count_single_sensorData_Array,point_,QPen(QColor(255, 192, 203)));
+                     Draw_line_on_right_coordinate(Pre_Point_List_Right,count_single_sensorData_Array,point_,QPen(QColor(255, 192, 203)));
                      break;
                  }
                      case 8:{
-                     Draw_line_on_right_coordinate(Pre_Point_List_Left,count_single_sensorData_Array,point_,QPen(QColor(0, 255, 0)));
+                     Draw_line_on_right_coordinate(Pre_Point_List_Right,count_single_sensorData_Array,point_,QPen(QColor(0, 255, 0)));
                      break;
                  }
                      case 9:{
-                     Draw_line_on_right_coordinate(Pre_Point_List_Left,count_single_sensorData_Array,point_,QPen(QColor(255, 215, 0)));
+                     Draw_line_on_right_coordinate(Pre_Point_List_Right,count_single_sensorData_Array,point_,QPen(QColor(255, 215, 0)));
                      break;
                  }
                      case 10:{
-                     Draw_line_on_right_coordinate(Pre_Point_List_Left,count_single_sensorData_Array,point_,QPen(QColor(238, 130, 238)));
+                     Draw_line_on_right_coordinate(Pre_Point_List_Right,count_single_sensorData_Array,point_,QPen(QColor(238, 130, 238)));
                      break;
                  }
                      case 11:{
-                     Draw_line_on_right_coordinate(Pre_Point_List_Left,count_single_sensorData_Array,point_,QPen(QColor(144, 238, 144)));
+                     Draw_line_on_right_coordinate(Pre_Point_List_Right,count_single_sensorData_Array,point_,QPen(QColor(144, 238, 144)));
                      break;
                  }
                      case 12:{
-                     Draw_line_on_right_coordinate(Pre_Point_List_Left,count_single_sensorData_Array,point_,QPen(QColor(240, 128, 128)));
+                     Draw_line_on_right_coordinate(Pre_Point_List_Right,count_single_sensorData_Array,point_,QPen(QColor(240, 128, 128)));
                      break;
                  }
                      case 13:{
-                     Draw_line_on_right_coordinate(Pre_Point_List_Left,count_single_sensorData_Array,point_,QPen(QColor(240, 230, 140)));
+                     Draw_line_on_right_coordinate(Pre_Point_List_Right,count_single_sensorData_Array,point_,QPen(QColor(240, 230, 140)));
                      break;
                  }
                      case 14:{
-                     Draw_line_on_right_coordinate(Pre_Point_List_Left,count_single_sensorData_Array,point_,QPen(QColor(64, 224, 208)));
+                     Draw_line_on_right_coordinate(Pre_Point_List_Right,count_single_sensorData_Array,point_,QPen(QColor(64, 224, 208)));
                      break;
                  }
                      case 15:{
-                     Draw_line_on_right_coordinate(Pre_Point_List_Left,count_single_sensorData_Array,point_,QPen(QColor(255, 160, 122)));
+                     Draw_line_on_right_coordinate(Pre_Point_List_Right,count_single_sensorData_Array,point_,QPen(QColor(255, 160, 122)));
                      break;
                  }
                  }
               }
 
               if (count_single_sensorData_Array < rightRectItems.size()) {
-//                  rightTextBrowsers[count_single_sensorData_Array]->setText(str);
-//                  rightRectItems[count_single_sensorData_Array]->setBrush(QColor(0,0,255));
                   rightRectItems[count_single_sensorData_Array]->setColor(QColor(colorvalue,0,255 - colorvalue));
               }
           }
@@ -803,6 +890,7 @@ void MainWindow::Visualization_one_sensor_group()
 
 void MainWindow::SLOT_of_Sliderdropped()
 {
+    pauseindex = true;
     QList<RoundedRectItem*> RectItems_ =
     {
         RectItemR1, RectItemR2, RectItemR3, RectItemR4, RectItemR5, RectItemR6,
@@ -815,12 +903,49 @@ void MainWindow::SLOT_of_Sliderdropped()
     qDebug() << "SLOT_of_Sliderdropped()";
     for (int i = 0; i < RectItems_.size();i++)
     {
-        RectItems_[i]->setBrush(QColor(0,0,255));
+        RectItems_[i]->setColor(QColor(0,0,255));
     }
-    count_number_of_sensorData_Array = ui->horizontalSlider->value();
-    Slider_value = count_number_of_sensorData_Array;
+
+    ui->textBrowser_TIMESTAMP->clear();
+    Pressure_value_Reset();
+
+    Slider_value = ui->horizontalSlider->value();//滑块滑动之后的滑块值
+    Different_between_pre_and_current_Slidervalue = Slider_value - Pre_Slider_value;//和滑动之前的滑块值之间的差值,也就相当于滑动了几个单位，因为可以往左右两个方向滑动，所以这个值可正可负
+    Pre_Slider_value = Slider_value;//把当前的、滑块滑动之后的滑块值传给Pre_Slider_value
+
+    int correspondingSecond = uniqueSeconds[Slider_value];
+    qDebug() << "Corresponding second in uniqueSeconds:" << correspondingSecond;
+    count_number_of_sensorData_Array = findFirstTimestampEndingWithnumberX(sensorDataArray,correspondingSecond);//当前的sensorDataArray中，第一个、timeStamp最后一位是 new_lastPart_slider的数据组的索引下标
+
     Visualization_after_Slider_dropped(count_number_of_sensorData_Array);
-    pauseindex = true;
+
+    //对Pressure value可视化的设置
+    if (count_number_of_sensorData_Array > 0)
+       {
+           if(leftFoot)
+           {
+               for (int i = 0; i < Pre_Point_List_Left.size(); ++i)
+               {
+                   const QJsonValue &value_ = sensorDataArray[count_number_of_sensorData_Array - 1];
+                   QJsonObject sensorDataObject_ = value_.toObject();
+                   QJsonArray sensorData_ = sensorDataObject_["sensorData"].toArray();
+                   int val_ = sensorData_[i].toInt();
+                   Pre_Point_List_Left[i] = QPointF(50 + (count_number_of_sensorData_Array - 1) + (60.0 / 750.0), 680 - (val_ / 5000.0 * 650));
+               }
+           }
+           else if(!leftFoot)
+           {
+               for (int i = 0; i < Pre_Point_List_Right.size(); ++i)
+               {
+                   const QJsonValue &value_ = sensorDataArray[count_number_of_sensorData_Array - 1];
+                   QJsonObject sensorDataObject_ = value_.toObject();
+                   QJsonArray sensorData_ = sensorDataObject_["sensorData"].toArray();
+                   int val_ = sensorData_[i].toInt();
+                   Pre_Point_List_Right[i] = QPointF(50 + (count_number_of_sensorData_Array - 1) + (60.0 / 750.0), 680 - (val_ / 5000.0 * 650));
+               }
+           }
+       }
+
 
 }
 
@@ -843,6 +968,8 @@ void MainWindow::Visualization_after_Slider_dropped(int count_number)
     QJsonObject sensorDataObject_ = value_.toObject();
     bool leftfoot_ = sensorDataObject_["leftFoot"].toBool();
     QJsonArray sensorData_ = sensorDataObject_["sensorData"].toArray();
+//    timeStamp = sensorDataObject_["timeStamp"].toString();
+//    ui->textBrowser_TIMESTAMP->setText(timeStamp);
 
     QList<int> sensorDataList;
     int minVal_ = std::numeric_limits<int>::max();
@@ -864,7 +991,7 @@ void MainWindow::Visualization_after_Slider_dropped(int count_number)
             QString str__ = QString::number(val__,'f', 2);
             int colorvalue__ = (int)(((val__ - minVal_) / (double)(maxVal_ - minVal_)) * 255);
             qDebug() << "Now is the visualization after slider dragged for jsonfile" << Json_file_name << ", leftfoot, sensor group number:" << count_number << ", sensor number:" << i << "value: " << val__;
-            leftRectItems_[i]->setBrush(QColor(colorvalue__,0,255 - colorvalue__));
+            leftRectItems_[i]->setColor(QColor(colorvalue__,0,255 - colorvalue__));
         }
     }
     else
@@ -875,9 +1002,9 @@ void MainWindow::Visualization_after_Slider_dropped(int count_number)
             QString str__ = QString::number(val__,'f', 2);
             int colorvalue__ = (int)(((val__ - minVal_) / (double)(maxVal_ - minVal_)) * 255);
             qDebug() << "Now is the visualization after slider dragged for jsonfile" << Json_file_name << ", rightfoot, sensor group number:" << count_number << ", value of sensor " << i << "value: " << val__;
-            rightRectItems_[i]->setBrush(QColor(colorvalue__,0,255 - colorvalue__));
+            rightRectItems_[i]->setColor(QColor(colorvalue__,0,255 - colorvalue__));
         }
-    }
+    }    
 }
 
 void MainWindow::Draw_line_on_right_coordinate(QList<QPointF>& Pre_point_list, int count_single_sensorData_Array_, QPointF point__,QPen pen)
@@ -885,28 +1012,43 @@ void MainWindow::Draw_line_on_right_coordinate(QList<QPointF>& Pre_point_list, i
 
     if(count_number_of_sensorData_Array != 0)
     {
-        qDebug() << "X坐标：" << Pre_point_list[count_single_sensorData_Array_].x() << "Y坐标: " << Pre_point_list[count_single_sensorData_Array_].y();
-        scene_Pressure_value->addLine(QLineF(Pre_point_list[count_single_sensorData_Array_].x(), Pre_Point_List_Left[count_single_sensorData_Array_].y(), 50 + point__.x()*10, 680 - (point__.y() / 5000 * 650)), pen);
-        Pre_point_list[count_single_sensorData_Array_] = QPointF(50 + point__.x()*10, 680 - (point__.y() / 5000 * 650));
+//        qDebug() << "X坐标：" << Pre_point_list[count_single_sensorData_Array_].x() << "Y坐标: " << Pre_point_list[count_single_sensorData_Array_].y();
+        QGraphicsLineItem* line =  scene_Pressure_value->addLine(QLineF(Pre_point_list[count_single_sensorData_Array_].x(), Pre_point_list[count_single_sensorData_Array_].y(), 50 + point__.x() + (60.0 / 750.0), 680 - (point__.y() / 5000 * 650)), pen);
+        lineGroup->addToGroup(line);
+        Pre_point_list[count_single_sensorData_Array_] = QPointF(50 + point__.x() + (60.0 / 750.0), 680 - (point__.y() / 5000 * 650));
     }
     else if(count_number_of_sensorData_Array == 0)
     {
-        Pre_point_list[count_single_sensorData_Array_] = QPoint(50 + point__.x(), 680 - (point__.y() / 5000 * 650));
-        qDebug() << "X坐标：" << Pre_point_list[count_single_sensorData_Array_].x() << "Y坐标: " << Pre_point_list[count_single_sensorData_Array_].y();
+        Pre_point_list[count_single_sensorData_Array_] = QPoint(50 + point__.x() + (60.0 / 750.0), 680 - (point__.y() / 5000 * 650));
+//        qDebug() << "X坐标：" << Pre_point_list[count_single_sensorData_Array_].x() << "Y坐标: " << Pre_point_list[count_single_sensorData_Array_].y();
     };
-
-
-//    qreal x = point__.x() * 10;
-//    qreal y = 600 - point__.y() - 2;
-
-//    if(count_single_sensorData_Array_ != 0)
-//    {
-//        if (Pre_point_list[count_single_sensorData_Array_].x() == 0 && Pre_point_list[count_single_sensorData_Array_].y() == 0)
-//        {
-//            Pre_point_list[count_single_sensorData_Array_] = QPointF(0, y);
-//        }
-//        scene_Pressure_value->addLine(QLineF(Pre_point_list[count_single_sensorData_Array_].x(), Pre_point_list[count_single_sensorData_Array_].y(), x, y), pen);
-//    }
-//    Pre_point_list[count_single_sensorData_Array_] = QPointF(x, y);
 }
+
+// 添加一个函数用于清除绘制的折线
+void MainWindow::clearLines()
+{
+    scene_Pressure_value->removeItem(lineGroup);
+    delete lineGroup;
+
+    lineGroup = new QGraphicsItemGroup();
+    scene_Pressure_value->addItem(lineGroup);
+}
+
+int MainWindow::findFirstTimestampEndingWithnumberX(const QJsonArray &sensorDataArray_,const int numberX) {
+
+    for(int i = 0;i < sensorDataArray_.size();++i)
+    {
+        QJsonObject obj = sensorDataArray_[i].toObject();
+        QString timeStamp_ = obj["timeStamp"].toString();
+        int timeStamp_lastbit = timeStamp_.section(':', -1).toInt();
+        if(!timeStamp_.isEmpty() && (timeStamp_lastbit == numberX))
+        {
+            qDebug() << obj;
+            return i;
+            break;
+        }
+    }
+}
+
+
 

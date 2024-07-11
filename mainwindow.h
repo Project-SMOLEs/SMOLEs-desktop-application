@@ -6,6 +6,7 @@
 #include <QGraphicsRectItem>
 #include <QFileDialog>
 #include <QJsonArray>
+#include <QSet>
 #include "RoundedRectItem.h"
 #include "Thread.h"
 
@@ -68,6 +69,9 @@ public:
     void Visualization_after_Slider_dropped(int);
     void Check_states_of_allcheckbox();
     void Draw_line_on_right_coordinate(QList<QPointF>&,int,QPointF, QPen);
+    void clearLines();
+    int findFirstTimestampEndingWithnumberX(const QJsonArray &,const int );
+
 
 
     ~MainWindow();
@@ -84,34 +88,43 @@ private slots:
 
     void Set_Jsonfile_name();
     void Visualization_Reset();
+    void Pressure_value_Reset();
+    void Reset();
     void Reset_Confirmwindow();
     void on_pushButton_ANALYSIS_clicked();
     void SLOT_of_Sliderdropped();
+    void Run_visualization_automaticaly_window();
 
+
+    void on_pushButton_RESET_clicked();
 
 private:
     Ui::MainWindow *ui;
 
-    QString headfilepath = "D:\\GUI\\demo\\SMOLEs-desktop-application\\sensordata";
+    const QString headfilepath = "D:\\GUI\\demo\\SMOLEs-desktop-application\\sensordata";
     QString Json_file_name;
-    QString Json_file_folder_path = "D:\\GUI\\demo\\SMOLEs-desktop-application\\sensordata";
-    QString Combobox_defaultValue = "Json file selection";
+    const QString Json_file_folder_path = "D:\\GUI\\demo\\SMOLEs-desktop-application\\sensordata";
+    const QString Combobox_defaultValue = "Json file selection";
     QStringList infolist;
     QVector<QJsonObject> jsonObjects; // to store json data
     QJsonArray sensorDataArray;
-
-    Thread *thread1;
-    Thread *thread2;
+    QGraphicsItemGroup* lineGroup;
 
     int label, minVal, maxVal;
     bool leftFoot, sign_of_checkbox;
-    QString timeStamp;
+    QString timeStamp,previous_last_bit_TimeStamp;
     QJsonArray sensorData;
     bool pauseindex = false;
-    int count_number_of_sensorData_Array;//this parameter for counting the number of sensor Data array, maximum is 58
+    int count_number_of_sensorData_Array;//this parameter for counting the number of sensor Data array, maximum is almost 750
     int Slider_value = 0;
+    int Pre_Slider_value = 0;
+    int Different_between_pre_and_current_Slidervalue;
     QPen pen_Pressure_value;
     QBrush brush_;
+
+    QList<int> uniqueSeconds;
+    bool firstSecondAddedAgain = false;
+    int lastAddedSecond = -1;
 
     QPoint Pre_LSensor1,Pre_LSensor2,Pre_LSensor3,Pre_LSensor4,Pre_LSensor5,Pre_LSensor6,Pre_LSensor7,Pre_LSensor8,Pre_LSensor9,Pre_LSensor10,
            Pre_LSensor11,Pre_LSensor12,Pre_LSensor13,Pre_LSensor14,Pre_LSensor15,Pre_LSensor16,Pre_RSensor1,Pre_RSensor2,Pre_RSensor3,
